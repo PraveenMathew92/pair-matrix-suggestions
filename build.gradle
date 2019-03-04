@@ -9,6 +9,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'jacoco'
+}
+
 group 'PairingMatrixSuggestions'
 version '1.0-SNAPSHOT'
 
@@ -51,4 +55,34 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     classpath = configurations.ktlint
     main = "com.github.shyiko.ktlint.Main"
     args "-F", "src/**/*.kt"
+}
+
+test {
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpDir = file("$buildDir/jacoco/classpathdumps")
+    }
+}
+
+jacocoTestReport{
+    reports{
+        html.setDestination(new File("${buildDir}/jacoco"))
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 1
+            }
+        }
+    }
+}
+
+build.dependsOn(jacocoTestCoverageVerification)
+
+task applicationCodeCoverageReport(type:JacocoReport) {
+    executionData build
+    sourceSets sourceSets.main
 }
